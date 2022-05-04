@@ -19,16 +19,20 @@ const Login = ({ redirectTo = '/' }) => {
 
   function handleSubmit(event) {
     event.preventDefault()
+    const smatch = autoLoginUrl?.match(/^https:\/\/intra\.epitech\.eu\/auth-(\w{40})$/);
+    if (smatch.length !== 2)
+      return;
+    console.log(smatch);
     authenticate({
       displayName: 'User',
-      login: autoLoginUrl,
+      login: smatch[1],
     })
   }
 
   const authenticate = (user) => {
-    const loadName = async () => {
-      const data = await fetch(user.login)
-    }
+    // const loadName = async () => {
+    //   const data = await fetch(user.login)
+    // }
     setAuth({ isAuthenticated: true, ...user })
     toggleThis('isAuthMenuOpen', false)
 
@@ -45,7 +49,7 @@ const Login = ({ redirectTo = '/' }) => {
     <Page pageTitle={intl.formatMessage({ id: 'sign_in' })}>
       <CustomPaper elevation={6}>
         <div
-          sytle={{
+          style={{
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
@@ -57,7 +61,7 @@ const Login = ({ redirectTo = '/' }) => {
             {intl.formatMessage({ id: 'sign_in' })}
           </Typography>
           <form
-            sytle={{ marginTop: theme.spacing(1) }}
+            style={{ marginTop: theme.spacing(1) }}
             onSubmit={handleSubmit}
             noValidate
           >
@@ -69,7 +73,7 @@ const Login = ({ redirectTo = '/' }) => {
               required
               fullWidth
               name="autoLoginUrl"
-              label={intl.formatMessage({ id: 'autoLoginUrl' })}
+              label={intl.formatMessage({ id: 'auto_login_url' })}
               id="autoLoginUrl"
               autoFocus
             />
@@ -79,6 +83,7 @@ const Login = ({ redirectTo = '/' }) => {
               variant="contained"
               color="primary"
               style={{ margin: theme.spacing(3, 0, 2) }}
+              disabled={!autoLoginUrl?.match(/^https:\/\/intra\.epitech\.eu\/auth-\w{40}$/)}
             >
               {intl.formatMessage({ id: 'sign_in' })}
             </Button>
@@ -93,7 +98,7 @@ const Login = ({ redirectTo = '/' }) => {
             }}
           >
             <a href="https://intra.epitech.eu/admin/autolog" target="_blank" rel="noreferrer">
-              {intl.formatMessage({ id: 'forgot_password' })}
+              {intl.formatMessage({ id: 'get_auto_login_url' })}
             </a>
             {/*<Link to="/password_reset">*/}
             {/*  {intl.formatMessage({ id: 'forgot_password' })}?*/}

@@ -29,7 +29,6 @@ const config = {
     onError: (e) => {
       // Here we warn the user about translation error
       //console.warn(e)
-      return
     },
   },
   menu: {
@@ -53,7 +52,7 @@ const config = {
     defaultIsRTL: false, //change this to true for default Right to Left Language support
   },
   pages: {
-    LandingPage: lazy(() => import('../pages/Login/Login')),
+    LandingPage: lazy(() => import('../pages/LandingPage/LandingPage')),
     PageNotFound: lazy(() => import('../pages/PageNotFound/PageNotFound')),
   },
 }
