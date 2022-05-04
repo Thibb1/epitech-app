@@ -1,11 +1,12 @@
 import Page from 'material-ui-shell/lib/containers/Page'
-import React, { useState } from 'react'
+import React from 'react'
 import { useIntl } from 'react-intl'
 
 import Paper from '@mui/material/Paper';
 import { ViewState } from '@devexpress/dx-react-scheduler';
 import {
   Scheduler,
+  DayView,
   WeekView,
   MonthView,
   ViewSwitcher,
@@ -18,26 +19,8 @@ import {
   Resources,
 } from '@devexpress/dx-react-scheduler-material-ui';
 import { get_planning_events } from '../../api/api'
-import { buildFilter, filterData, mapData } from '../../utils/filter'
+import { buildFilter, filterData, filterOutData, mapData } from '../../utils/filter'
 import { useAuth } from 'base-shell/lib/providers/Auth';
-import { ConstructionOutlined } from '@mui/icons-material';
-
-function myFetch(uri) {
-  return fetch(uri)
-    .then(res => res.json())
-    .then(json => {
-      if (json.error) {
-        console.log(json.error)
-        return []
-      }
-      return json
-    })
-    .catch(err => {
-      console.log(err)
-      return []
-    })
-}
-
 
 const Planning = () => {
   let rawSchelerData = JSON.parse(localStorage.getItem('schedulerData')) || []
@@ -62,13 +45,15 @@ const Planning = () => {
         rawSchelerData = mappedData
       })
   }
+  // TODO on the fly query
   const query = {
     moduleCode: [
-      'B-ANG-001',
-      'G-EPI-004',
+      // 'B-ANG-001',
+      // 'G-EPI-004',
     ],
     codeInstance: [
       // 'LIL-0-1',
+      'LIL-4-1',
     ],
     moduleAvailable: [
       // true,
@@ -83,24 +68,59 @@ const Planning = () => {
 
     ],
   }
-  // console.log(query)
   const filter = buildFilter(query)
-  // console.log(filter)
-  const filteredSchedulerData = filterData(rawSchelerData, filter)
+  let filteredSchedulerData = filterData(rawSchelerData, filter)
+  const queryOut = {
+    moduleCode: [
+      'B-ANG-001',
+    ],
+    codeInstance: [
+      // 'LIL-0-1',
+      'LIL-2-1',
+      'FR-8-1',
+    ],
+  }
+  const filterOut = buildFilter(queryOut)
+  filteredSchedulerData = filterOutData(filteredSchedulerData, filterOut)
   console.log(filteredSchedulerData)
 
-  const data = [{
-    fieldName: 'moduleCode',
-    title: 'moduleCode',
-    allowMultiple: false,
-    instances: [
-      { id: 'B-ANG-001', text: 'B-ANG-001' },
-      { id: 'G-EPI-004', text: 'G-EPI-004' },
-    ],
-  }]
-  // parse fetch data to schedulerData
-  // const schedulerData = [
-  //
+  const moduleCodeInstances = filteredSchedulerData
+    .map(item => item.moduleCode)
+    .filter((item, index, self) => self.findIndex(i => i === item) === index)
+    .map(moduleCode => {return {id: moduleCode, text: moduleCode}})
+  const codeInstanceModules = filteredSchedulerData
+    .map(item => item.codeInstance)
+    .filter((item, index, self) => self.findIndex(i => i === item) === index)
+    .map(codeInstance => {return {id: codeInstance, text: codeInstance}})
+  const moduleTitleInstances = filteredSchedulerData
+    .map(item => item.moduleTitle)
+    .filter((item, index, self) => self.findIndex(i => i === item) === index)
+    .map(moduleTitle => {return {id: moduleTitle, text: moduleTitle}})
+
+  const resources = [
+    {
+      fieldName: 'moduleCode',
+      title: 'moduleCode',
+      isMain: true,
+      instances: moduleCodeInstances,
+    },
+    {
+      fieldName: 'codeInstance',
+      title: 'codeInstance',
+      instances: codeInstanceModules,
+    },
+    {
+      fieldName: 'moduleTitle',
+      title: 'moduleTitle',
+      instances: moduleTitleInstances,
+    }
+  ]
+  // TODO remove time on tiles for mobile users
+  // const layout = props => (
+  //   <WeekView.Layout
+  //     {...props}
+  //   />
+  // )
   const intl = useIntl()
 
   return (
@@ -109,8 +129,10 @@ const Planning = () => {
         <Scheduler
           locale={intl.locale}
           data={filteredSchedulerData}
+          firstDayOfWeek={1}
         >
-          {/* <ViewState
+          {/* TODO save currentDate to keep it on refresh
+          <ViewState
             currentDate={currentDate}
           /> */}
           <ViewState
@@ -121,6 +143,10 @@ const Planning = () => {
             endDayHour={19}
           />
           <WeekView
+            startDayHour={9}
+            endDayHour={19}
+          />
+          <DayView
             startDayHour={9}
             endDayHour={19}
           />
@@ -137,7 +163,7 @@ const Planning = () => {
           />
           <Resources
             mainResourceName='moduleCode'
-            dataSource={data}
+            data={resources}
           />
         </Scheduler>
       </Paper>

@@ -21,6 +21,7 @@ app.get('/api/user', (req, res) => {
     .catch(err => res.status(500).json(err))
 })
 
+// TODO check if startDate and endDate are valid and their range is correct
 app.get('/api/planning/:start_date/:end_date', (req, res) => {
   api.get_planning_events(req.query.token, req.params.start_date, req.params.end_date)
     .then(events => res.json(events))
