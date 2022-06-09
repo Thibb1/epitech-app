@@ -1,13 +1,14 @@
 // base variables
+const axios = require('axios');
 const base_uri = 'https://intra.epitech.eu'
 
 // fetch wrapper with error handling
 async function fetch_call(uri, query_params = {}) {
   query_params.format = 'json'
   const params = new URLSearchParams(query_params)
-  console.log(uri + '?' + params)
-  const res = await fetch(uri + '?' + params)
-  const json = await res.json()
+  console.log(`${uri}?${params}`)
+  const res = await axios.get(`${uri}?${params}`)
+  const json = res.data
   if (json.error) {
     return json.error
   }
